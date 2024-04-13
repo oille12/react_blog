@@ -30,14 +30,8 @@ function App() {
   let [score, setScore] = useState([0,0,0,0])
   // useState로 false [modal, setModal]
   let [modal, setModal] = useState(false)
+  let [curIdx, setCurIdx] = useState(0)
 
-  function upScore0(){
-    setScore(()=>{
-      let src = [...score]
-      src[0] += 1
-      return src
-    })
-  }
 
   // return 안에는 html 코드 (자바스크립트 작성하려면 {} 필요)
   return (
@@ -47,47 +41,50 @@ function App() {
         <h4 style={{color:'white', fontSize:'20px'}}>{value}</h4>
       </div>
 
-      <div className="list">
-        <h4>{title[0]}<span onClick={(e)=>{
-          // 자바스크립트에서 배열요소를 수정하려면 분해했다가 변경하고 다시 합쳐야 함
-          e.stopPropagation()
-          upScore0()
-        }}> 👍</span> {score[0]}</h4>
-        <p>{dateTime[0]} 작성</p>
-      </div>
-      <div className="list">
-        <h4>{title[1]}<span onClick={()=>{
-          setScore(()=>{
-            let src = [...score]
-            src[1] += 1
-            return src
-          })
-        }}> 👍</span> {score[1]}</h4>
-        <p>{dateTime[1]} 작성</p>
-      </div>
-      <div className="list">
-        <h4>{title[2]}<span onClick={()=>{
-          setScore(()=>{
-            let src = [...score]
-            src[2] += 1
-            return src
-          })
-        }}> 👍</span> {score[2]}</h4>
-        <p>{dateTime[2]} 작성</p>
-      </div>
-      <div className="list">
-        <h4>{title[3]}<span onClick={()=>{
-          setScore(()=>{
-            let src = [...score]
-            src[3] += 1
-            return src
-          })
-        }}> 👍</span> {score[3]}</h4>
-        <p>{dateTime[3]} 작성</p>
-      </div>
+    {/* 
+        리액트에서 {} 안의 반복문은 for가 아니라 map
+        for(){}에서 중과롷가 중복되기 때문에 map으로 제공한다.
+        배열.map()
 
-      {/* 부분만 떼고 싶다 -> 컴포넌트로 만든다 */}
-      { modal == true ? <Modal /> : null }
+        // 중괄호 안에서 반복문은 map == forEach
+        // title 배열 갯수만큼 반복
+        // map 가장 바깥 태그에 구분할 수 있는 key 적어주기
+    */}
+
+      {title.map(function(element, idx){
+        return(
+          <div className='list' key={idx}>
+            <h4 onClick={()=>{
+              setCurIdx(idx)
+              setModal(true)
+            }}>{element} <span onClick={(e)=>{
+              // 자바스크립트에서 배열요소 수정하려면 분해했다가 변경후 합침
+              e.stopPropagation();
+              setScore(()=>{
+                let src = [...score]
+                src[idx] += 1
+                return src
+              })
+            }}> 👍</span> {score[idx]}</h4>
+            <p>{dateTime[idx]} 작성</p>
+          </div>
+        )
+      })}
+
+      {/* 부분만 떼고 싶다 -> 컴포넌트로 만든다 
+      
+          modal값이 false면 안보이게, true면 보이게
+          {}안에 자바스크립트 코드 넣어야 하는데 if, for는 {}를 사용하므로 중복되어서 사용 불가능
+          => if는 삼항연산자로, for는 map으로 제공
+
+          // 제목을 클릭하면 모달창이 등장
+          // h4태그에 onClick을 넣고 setModal을 true로 넣게
+
+          // 다음 컨포넌트에 값 넘겨줄때는 props 라는 것을 사용
+          // 컴포넌트에 값을 전달한다 
+      */}
+
+      { modal == true ? <Modal idx={curIdx} title={title} date={dateTime} /> : null }
 
     </div>
   );
@@ -97,12 +94,12 @@ export default App;
 
 // Modal 컴포넌트 분리
 //  코드가 길어지면 별도의 함수로 분리해서 '컴포넌트'로 만들어준다.
-function Modal(){ 
+function Modal(props){ 
   return (
     <>
       <div className='modal'>
-        <h4>제목</h4>
-        <p>날짜 작성</p>
+        <h4>{props.title[props.idx]}</h4>
+        <p>{props.date[props.idx]}</p>
         <p>상세 내용</p>
       </div>
     </>
